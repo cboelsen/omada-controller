@@ -1,0 +1,41 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Set up Omada Controller",
+                "data": {
+                    "name": "[%key:common::config_flow::data::name%]",
+                    "url": "[%key:common::config_flow::data::url%]",
+                    "username": "[%key:common::config_flow::data::username%]",
+                    "password": "[%key:common::config_flow::data::password%]",
+                    "verify_ssl": "[%key:common::config_flow::data::ssl%]"
+                }
+            },
+            "reauth_confirm": {
+                "description": "The password for {username} is invalid.",
+                "title": "[%key:common::config_flow::title::reauth%]",
+                "data": {
+                    "password": "[%key:common::config_flow::data::password%]"
+                }
+            }
+        },
+        "error": {
+            "name_exists": "Name exists",
+            "cannot_connect": "[%key:common::config_flow::error::cannot_connect%]",
+            "invalid_auth": "[%key:common::config_flow::error::invalid_auth%]"
+        },
+        "abort": {
+            "already_configured": "[%key:common::config_flow::abort::already_configured_device%]",
+            "reauth_successful": "[%key:common::config_flow::abort::reauth_successful%]"
+        }
+    },
+    "options": {
+        "step": {
+            "device_tracker": {
+                "data": {
+                    "detection_time": "Consider home interval"
+                }
+            }
+        }
+    }
+}

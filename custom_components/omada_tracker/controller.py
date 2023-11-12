@@ -6,12 +6,12 @@ from typing import Any
 from urllib.parse import urlparse
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_DETECTION_TIME, CONF_HOST, CONF_PASSWORD, CONF_USERNAME, CONF_VERIFY_SSL
+from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME, CONF_VERIFY_SSL
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DEFAULT_DETECTION_TIME, DOMAIN, NAME
+from .const import CONF_DETECTION_TIME, DEFAULT_DETECTION_TIME, DOMAIN, NAME
 from .device import Device
 from .errors import CannotConnect, LoginError
 

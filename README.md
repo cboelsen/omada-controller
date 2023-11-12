@@ -1,3 +1,3 @@
-# Omada Tracker for Home Assistant
+# Omada Controller Integration for Home Assistant
 
 ## Installation

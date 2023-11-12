@@ -20,7 +20,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         api = await hass.async_add_executor_job(
             lambda: OmadaController(dict(config_entry.data))
         )
-        api.login()
+        await hass.async_add_executor_job(api.login)
     except CannotConnect as api_error:
         raise ConfigEntryNotReady from api_error
     except LoginError as err:
@@ -30,7 +30,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     await hass.async_add_executor_job(coordinator.api.get_controller_details)
     await coordinator.async_config_entry_first_refresh()
 
-    hass.data.setdefalt(DOMAIN, {})[config_entry.entry_id] = coordinator
+    hass.data.setdefault(DOMAIN, {})[config_entry.entry_id] = coordinator
 
     await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
 

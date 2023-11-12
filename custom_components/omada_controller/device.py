@@ -24,7 +24,7 @@ class Device:
     def _set_last_seen(self, params: dict[str, Any]) -> None:
         timestamp: int | None = params.get("lastSeen")
         if timestamp:
-            self._last_seen = datetime.utcfromtimestamp(timestamp)
+            self._last_seen = datetime.utcfromtimestamp(timestamp / 1000.0)
 
     @property
     def name(self) -> str:

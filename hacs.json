@@ -1,5 +1,5 @@
 {
-  "name": "Omada Tracker",
-  "render_readme": true,
-  "iot_class": "local_polling"
+    "name": "Omada Controller",
+    "render_readme": true,
+    "iot_class": "local_polling"
 }

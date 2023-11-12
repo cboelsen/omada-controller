@@ -6,7 +6,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_HOST, CONF_PASSWORD, CONF_USERNAME, CONF_VERIFY_SSL
+from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME, CONF_VERIFY_SSL
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -21,16 +21,16 @@ _LOGGER = logging.getLogger(__name__)
 class OmadaController:
     """Wrapper around the API on TP-Link's Omada Controller."""
 
-    def __init__(self, config_entry: ConfigEntry) -> None:
-        self.config_entry = config_entry
-        self.url: str = self.config_entry.data[CONF_URL]
+    def __init__(self, config: dict[str, Any]) -> None:
+        self.config = config
+        self.url: str = self.config[CONF_URL]
         self.token: str | None = None
         self.site_id: str | None = None
         self.headers: dict[str, str] = {"Content-Type": "application/json"}
         self.session: requests.Session = requests.Session()
-        self.session.verify = self.config_entry.data[CONF_VERIFY_SSL]
+        self.session.verify = self.config[CONF_VERIFY_SSL]
         self.sites: dict[str, str] = {}
-        self.controller_id: str = ""
+        self.controller_id: str = self.get_info()["omadacId"]
 
     def get_info(self) -> dict[str, Any]:
         """Get controller info."""
@@ -43,8 +43,8 @@ class OmadaController:
     def login(self) -> None:
         """Log into the API annd collecto the authentication token."""
         url = f"{self.url}/api/v2/login"
-        username: str = self.config_entry.data[CONF_USERNAME]
-        password: str = self.config_entry.data[CONF_PASSWORD]
+        username: str = self.config[CONF_USERNAME]
+        password: str = self.config[CONF_PASSWORD]
         data: dict[str, str] = {"username": username, "password": password}
         try:
             response = self.session.post(url, json=data, headers=self.headers).json()
@@ -67,7 +67,7 @@ class OmadaController:
 
         url = (
             f"{self.url}/{self.controller_id}/api/v2/users/current"
-            "?token={self.token}&currentPage=1&currentPageSize=1000"
+            f"?token={self.token}&currentPage=1&currentPageSize=1000"
         )
         try:
             user_response = self.session.get(url, headers=self.headers).json()
@@ -81,7 +81,7 @@ class OmadaController:
         site_id = self.sites[site_name]
         url = (
             f"{self.url}/{self.controller_id}/api/v2/sites/{site_id}/clients"
-            "?token={self.token}&currentPage=1&currentPageSize=1000&filters.active=true"
+            f"?token={self.token}&currentPage=1&currentPageSize=1000&filters.active=true"
         )
         try:
             return self.session.get(url, headers=self.headers).json()["result"]["data"]
@@ -111,7 +111,6 @@ class OmadaControllerData:
     def get_controller_details(self) -> None:
         """Get what little details can be retrieved about the controller."""
         info = self.api.get_info()
-        self.api.controller_id = info["omadacId"]
         self.model: str = info["type"]
         self.firmware: str = info["controllerVer"]
         self.serial_number: str = self.api.controller_id
@@ -196,6 +195,6 @@ class OmadaControllerDataUpdateCoordinator(DataUpdateCoordinator[None]):
         """Represent Omada Controller data object."""
         return self._oc_data
 
-    async def update_method(self) -> None:
+    async def _async_update_data(self) -> None:
         """Update devices information."""
         await self.hass.async_add_executor_job(self._oc_data.update_devices)

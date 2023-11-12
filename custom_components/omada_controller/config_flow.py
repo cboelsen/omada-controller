@@ -9,8 +9,8 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import (
     CONF_NAME,
-    CONF_HOST,
     CONF_PASSWORD,
+    CONF_URL,
     CONF_USERNAME,
     CONF_VERIFY_SSL,
 )
@@ -47,11 +47,11 @@ class OmadaControllerFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle a flow initialized by the user."""
         errors = {}
         if user_input is not None:
-            self._async_abort_entries_match({CONF_HOST: user_input[CONF_HOST]})
+            self._async_abort_entries_match({CONF_URL: user_input[CONF_URL]})
 
             try:
                 api = await self.hass.async_add_executor_job(lambda: OmadaController(user_input))
-                api.login()
+                await self.hass.async_add_executor_job(api.login)
             except CannotConnect:
                 errors["base"] = "cannot_connect"
             except LoginError:
@@ -60,7 +60,7 @@ class OmadaControllerFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
             if not errors:
                 return self.async_create_entry(
-                    title=f"{DEFAULT_NAME} ({user_input[CONF_HOST]})", data=user_input
+                    title=f"{DEFAULT_NAME} ({user_input[CONF_URL]})", data=user_input
                 )
         return self.async_show_form(
             step_id="user",
@@ -93,7 +93,7 @@ class OmadaControllerFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             user_input = {**self._reauth_entry.data, **user_input}
             try:
                 api = await self.hass.async_add_executor_job(lambda: OmadaController(user_input))
-                api.login()
+                await self.hass.async_add_executor_job(api.login)
             except CannotConnect:
                 errors["base"] = "cannot_connect"
             except LoginError:
